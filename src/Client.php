@@ -12,15 +12,16 @@ class Client
 {
     const USER_AGENT = 'WebwinkelKeur::Client/1.0';
 
-    protected $_headers = [
+    protected $headers = [
         'Content-Type' => 'application/json',
         'Accept' => 'application/json',
         'User-Agent' => self::USER_AGENT,
     ];
-    protected $_endpoint = 'https://dashboard.webwinkelkeur.nl/api/1.0/';
-    protected $_id = '';
-    protected $_code = '';
-    protected $_guzzleClient = null;
+    protected $endpoint = 'https://dashboard.webwinkelkeur.nl/api/1.0/';
+    protected $id = '';
+    protected $code = '';
+    /** @var GuzzleClient */
+    protected $guzzleClient = null;
 
     public function __construct($id, $code)
     {
@@ -30,45 +31,54 @@ class Client
 
     public function setEndpoint($URL)
     {
-        $this->_endpoint = (string)$URL;
+        $this->endpoint = (string)$URL;
 
         return $this;
     }
 
     public function setID($id)
     {
-        $this->_id = (string)$id;
+        $this->id = (string)$id;
 
         return $this;
     }
 
     public function setCode($code)
     {
-        $this->_code = (string)$code;
+        $this->code = (string)$code;
+
+        return $this;
+    }
+
+    public function setGuzzleClient(GuzzleClient $client)
+    {
+        $this->guzzleClient = $client;
 
         return $this;
     }
 
     public function getGuzzleClient()
     {
-        if (!$this->_guzzleClient) {
-            $this->_guzzleClient = new GuzzleClient(['base_uri' => $this->_endpoint]);
+        if (!$this->guzzleClient) {
+            $this->setGuzzleClient(new GuzzleClient(['base_uri' => $this->endpoint]));
         }
 
-        return $this->_guzzleClient;
+        return $this->guzzleClient;
     }
 
     public function sendInvitation(Invitation $request)
     {
         $result = $this->sendRequest('POST', 'invitations.json', $request);
 
+        if (!isset($result->status)) {
+            return false;
+        }
+
         return ('success' == $result->status);
     }
 
     public function sendRequest($method, $URL, RequestInterface $request)
     {
-        echo json_encode($request, JSON_PRETTY_PRINT);
-
         if (!$request->validate()) {
             throw new Exception\ValidationFailed();
         }
@@ -77,13 +87,11 @@ class Client
         if (!isset($options['query'])) {
             $options['query'] = [];
         }
-        $options['query'] = array_merge($options['query'], ['id' => $this->_id, 'code' => $this->_code]);
+        $options['query'] = array_merge($options['query'], ['id' => $this->id, 'code' => $this->code]);
 
         try {
-            // FIXME here
             /** @var Response $response */
-//            $response = $this->getGuzzleClient()->request($method, $URL, $options);
-            var_export($options); return json_decode(json_encode(['status' => 'success', 'message' => 'yay']));
+            $response = $this->getGuzzleClient()->request($method, $URL, $options);
 
         } catch (GuzzleException $e) {
             throw new Exception($e->getMessage(), $e->getCode(), $e);
@@ -93,15 +101,12 @@ class Client
             throw new Exception($result->message ?? $response->getReasonPhrase());
         }
 
-        switch (strtolower($response->getHeader('Content-Type'))) {
-            case 'application/json':
-                $result = json_decode($response->getBody()->getContents());
-                break;
-            default:
-                $result = $response->getBody()->getContents();
-                break;
+        foreach ($response->getHeader('Content-Type') as $contentType) {
+            if (strpos(strtolower($contentType), 'application/json') === 0) {
+                return json_decode($response->getBody()->getContents());
+            }
         }
 
-        return $result;
+        return $response->getBody()->getContents();
     }
 }

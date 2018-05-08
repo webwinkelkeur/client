@@ -39,14 +39,13 @@ abstract class RequestAbstract implements RequestInterface
             $this->options['headers']['Content-Type'] = 'application/x-www-form-urlencoded';
         }
 
-        switch (strtolower($this->options['headers']['Content-Type'])) {
-            case 'application/json':
-                $options['body'] = json_encode($this->fields);
-                break;
-            default:
-            case 'application/x-www-form-urlencoded':
-                $options['form_params'] = http_build_query($this->fields);
-                break;
+        $contentType = strtolower($this->options['headers']['Content-Type']);
+
+        if (strpos($contentType, 'application/x-www-form-urlencoded') === 0) {
+            $options['form_params'] = $this->fields;
+
+        } elseif (strpos($contentType, 'application/json') === 0) {
+            $options['json'] = $this->fields;
         }
 
         return $options;

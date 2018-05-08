@@ -10,41 +10,32 @@ use WebwinkelKeur\Client\RequestAbstract;
  */
 class Invitation extends RequestAbstract
 {
+    const DEFAULT_LANGUAGE = 'nl';
+
     public function validate()
     {
         if (!isset($this->fields['email']) or strpos($this->fields['email'], '@') === false) {
             return false;
         }
 
-        // email
-        // order "" order number
-        // language en
-        // delay
-        // customer_name
-        // phone_numbers []
-        // order_total
-        // client // optional name of the software where the request originated
-        // platform_version
-        // plugin_version
-
         return true;
     }
 
-    public function setOrderID($orderID)
+    public function setOrderNumber($orderNumber)
     {
-        if (!$orderID) {
-            throw new Exception\ValidationFailed();
+        if (!$orderNumber) {
+            throw new Exception\ValidationFailed("order: $orderNumber");
         }
 
-        $this->fields['order'] = (string)$orderID;
+        $this->fields['order'] = (string)$orderNumber;
 
         return $this;
     }
 
     public function setOrderTotal($orderTotal)
     {
-        if (!is_numeric($orderTotal)) {
-            throw new Exception\ValidationFailed($orderTotal);
+        if (!is_numeric($orderTotal) or $orderTotal < 0) {
+            throw new Exception\ValidationFailed("order_total: $orderTotal");
         }
 
         $this->fields['order_total'] = $orderTotal;
@@ -55,17 +46,20 @@ class Invitation extends RequestAbstract
     public function setDelay($delay)
     {
         $this->fields['delay'] = (int)(string)$delay;
+        if ($this->fields['delay'] < 1) {
+            $this->fields['delay'] = 1;
+        }
 
         return $this;
     }
 
-    public function setEmailAddress(string $emailAddress)
+    public function setEmailAddress($emailAddress)
     {
-        if (strpos($emailAddress, '@') === false) {
-            throw new Exception\ValidationFailed($emailAddress);
+        if (strpos((string)$emailAddress, '@') === false) {
+            throw new Exception\ValidationFailed("email: $emailAddress");
         }
 
-        $this->fields['email'] = $emailAddress;
+        $this->fields['email'] = (string)$emailAddress;
 
         return $this;
     }
