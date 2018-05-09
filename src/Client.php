@@ -70,11 +70,11 @@ class Client
     {
         $result = $this->sendRequest('POST', 'invitations.json', $request);
 
-        if (!isset($result->status)) {
-            return false;
+        if (!isset($result->status) or $result->status != 'success') {
+            throw new Exception\OperationFailed($result->message ?? '');
         }
 
-        return ('success' == $result->status);
+        return true;
     }
 
     public function sendRequest($method, $URL, RequestInterface $request)
