@@ -70,8 +70,8 @@ class Client
     {
         $result = $this->sendRequest('POST', 'invitations.json', $request);
 
-        if (!isset($result->status) or $result->status != 'success') {
-            throw new Exception\OperationFailed($result->message ?? '');
+        if (!isset($result->status) || $result->status != 'success') {
+            throw new Exception\OperationFailed(isset($result->message) ? $result->message : '');
         }
 
         return true;
@@ -97,8 +97,8 @@ class Client
             throw new Exception($e->getMessage(), $e->getCode(), $e);
         }
 
-        if ($response->getStatusCode() < 200 or 299 < $response->getStatusCode()) {
-            throw new Exception($result->message ?? $response->getReasonPhrase());
+        if ($response->getStatusCode() < 200 || 299 < $response->getStatusCode()) {
+            throw new Exception($response->getReasonPhrase());
         }
 
         foreach ($response->getHeader('Content-Type') as $contentType) {

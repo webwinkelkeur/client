@@ -14,7 +14,7 @@ class Invitation extends RequestAbstract
 
     public function validate()
     {
-        if (!isset($this->fields['email']) or strpos($this->fields['email'], '@') === false) {
+        if (!isset($this->fields['email']) || strpos($this->fields['email'], '@') === false) {
             return false;
         }
 
@@ -34,7 +34,7 @@ class Invitation extends RequestAbstract
 
     public function setOrderTotal($orderTotal)
     {
-        if (!is_numeric($orderTotal) or $orderTotal < 0) {
+        if (!is_numeric($orderTotal) || $orderTotal < 0) {
             throw new Exception\ValidationFailed("order_total: $orderTotal");
         }
 
