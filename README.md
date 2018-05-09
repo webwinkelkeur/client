@@ -29,7 +29,10 @@ $invitation
     ->setOrderNumber(184553)
     ->setOrderTotal(23.55);
 
-if ($webwinkelKeurClient->sendInvitation($invitation)) {
+try {
+    $webwinkelKeurClient->sendInvitation($invitation);
     echo 'Success!';
+} catch (Client\Exception $e) {
+    echo $e->getMessage();
 }
 ```

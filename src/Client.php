@@ -73,8 +73,6 @@ class Client
         if (!isset($result->status) || $result->status != 'success') {
             throw new Exception\OperationFailed(isset($result->message) ? $result->message : '');
         }
-
-        return true;
     }
 
     public function sendRequest($method, $URL, RequestInterface $request)
