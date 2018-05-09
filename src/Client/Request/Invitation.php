@@ -10,8 +10,6 @@ use WebwinkelKeur\Client\RequestAbstract;
  */
 class Invitation extends RequestAbstract
 {
-    const DEFAULT_LANGUAGE = 'nl';
-
     public function validate()
     {
         if (!isset($this->fields['email']) || strpos($this->fields['email'], '@') === false) {
