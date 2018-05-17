@@ -5,8 +5,10 @@ use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Response;
 use WebwinkelKeur\Client\Exception;
+use WebwinkelKeur\Client\Request\Blank;
 use WebwinkelKeur\Client\Request\Invitation;
 use WebwinkelKeur\Client\RequestInterface;
+use WebwinkelKeur\Client\Response\SentInvitation;
 
 class Client
 {
@@ -75,8 +77,34 @@ class Client
         }
     }
 
-    public function sendRequest($method, $URL, RequestInterface $request)
+    /**
+     * @return SentInvitation[]
+     *
+     * @throws Exception\OperationFailed
+     */
+    public function getSentInvitations()
     {
+        $result = $this->sendRequest('GET', 'invitations.json');
+
+        if (!isset($result->status) || $result->status != 'success') {
+            throw new Exception\OperationFailed(isset($result->message) ? $result->message : '');
+        }
+
+        $sentInvitations = [];
+
+        foreach ($result->invitations as $invitationData) {
+            $sentInvitations[] = new SentInvitation($invitationData);
+        }
+
+        return $sentInvitations;
+    }
+
+    public function sendRequest($method, $URL, RequestInterface $request = null)
+    {
+        if (!$request) {
+            $request = new Blank();
+        }
+
         if (!$request->validate()) {
             throw new Exception\ValidationFailed();
         }

@@ -6,6 +6,7 @@ abstract class RequestAbstract implements RequestInterface
     protected $options = [
         'http_errors' => 'false',
         'headers' => [],
+        'query' => [],
     ];
     protected $fields = [];
 
@@ -27,6 +28,7 @@ abstract class RequestAbstract implements RequestInterface
     {
         $options = [
             'headers' => $this->options['headers'],
+            'query' => [],
         ];
 
         if ('GET' == strtoupper($method)) {
