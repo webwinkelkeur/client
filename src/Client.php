@@ -162,6 +162,16 @@ class Client
     }
 
     /**
+     * @return Response\Webshop
+     */
+    public function getWebshop()
+    {
+        $result = $this->sendRequest('GET', 'webshop.json');
+
+        return new Response\Webshop($result->data);
+    }
+
+    /**
      * @param string                $method  Method of the request
      * @param string                $URL     URL to send the request to
      * @param RequestInterface|null $request Request

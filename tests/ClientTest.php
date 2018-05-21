@@ -199,4 +199,46 @@ final class ClientTest extends TestCase
         $this->assertEquals('219', $reviewsSummary->getAmount());
         $this->assertGreaterThan(9, $reviewsSummary->getRatingAverage());
     }
+
+    public function testGetWebshop()
+    {
+        $this->addMockJsonResponse('
+        {
+            "status": "success",
+            "message": "Webshop details successfully retrieved!",
+            "data": {
+                "name": "WebwinkelKeur.nl (Test)",
+                "address": {
+                    "street": "webwinkelkeur",
+                    "housenumber": "www",
+                    "postalcode": ".nl",
+                    "city": "https"
+                },
+                "logo": "https://dashboard.webwinkelkeur.nl/img/uploads/logos/1/wwk.png",
+                "languages": [
+                    {
+                        "name": "Dutch",
+                        "url": "https://www.webwinkelkeur.nl/leden/WebwinkelKeurnl-Test_1.html",
+                        "iso": "nl",
+                        "all": true,
+                        "main": true
+                    },
+                    {
+                        "name": "English",
+                        "url": "https://www.valuedshops.com/members/WebwinkelKeurnl-Test_1.html",
+                        "iso": "en",
+                        "all": true,
+                        "main": false
+                    }
+                ]
+            }
+        }');
+
+        $webshop = $this->client->getWebshop();
+
+        $this->assertEquals('webwinkelkeur', $webshop->getAddress()->getStreet());
+        foreach ($webshop->getLanguages() as $language) {
+            $this->assertInstanceOf(ClientResponse\Webshop\Language::class, $language);
+        }
+    }
 }
