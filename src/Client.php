@@ -3,12 +3,12 @@ namespace WebwinkelKeur;
 
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\Exception\GuzzleException;
-use GuzzleHttp\Psr7\Response;
+use GuzzleHttp\Psr7\Response as Psr7Response;
 use WebwinkelKeur\Client\Exception;
 use WebwinkelKeur\Client\Request\Blank;
 use WebwinkelKeur\Client\Request\Invitation;
 use WebwinkelKeur\Client\RequestInterface;
-use WebwinkelKeur\Client\Response\SentInvitation;
+use WebwinkelKeur\Client\Response;
 
 class Client
 {
@@ -25,12 +25,21 @@ class Client
     /** @var GuzzleClient */
     protected $guzzleClient = null;
 
+    /**
+     * @param string $id
+     * @param string $code
+     */
     public function __construct($id, $code)
     {
         $this->setID($id);
         $this->setCode($code);
     }
 
+    /**
+     * @param string $URL The URL of the API endpoint
+     *
+     * @return $this
+     */
     public function setEndpoint($URL)
     {
         $this->endpoint = (string)$URL;
@@ -38,6 +47,11 @@ class Client
         return $this;
     }
 
+    /**
+     * @param string $id
+     *
+     * @return $this
+     */
     public function setID($id)
     {
         $this->id = (string)$id;
@@ -45,6 +59,11 @@ class Client
         return $this;
     }
 
+    /**
+     * @param string $code Authorization code
+     *
+     * @return $this
+     */
     public function setCode($code)
     {
         $this->code = (string)$code;
@@ -52,6 +71,11 @@ class Client
         return $this;
     }
 
+    /**
+     * @param GuzzleClient $client
+     *
+     * @return $this
+     */
     public function setGuzzleClient(GuzzleClient $client)
     {
         $this->guzzleClient = $client;
@@ -59,6 +83,9 @@ class Client
         return $this;
     }
 
+    /**
+     * @return GuzzleClient
+     */
     public function getGuzzleClient()
     {
         if (!$this->guzzleClient) {
@@ -68,6 +95,11 @@ class Client
         return $this->guzzleClient;
     }
 
+    /**
+     * @param Invitation $request
+     *
+     * @throws Exception\OperationFailed
+     */
     public function sendInvitation(Invitation $request)
     {
         $result = $this->sendRequest('POST', 'invitations.json', $request);
@@ -78,27 +110,75 @@ class Client
     }
 
     /**
-     * @return SentInvitation[]
+     * @return Response\SentInvitation[]
      *
      * @throws Exception\OperationFailed
      */
     public function getSentInvitations()
     {
-        $result = $this->sendRequest('GET', 'invitations.json');
-
-        if (!isset($result->status) || $result->status != 'success') {
-            throw new Exception\OperationFailed(isset($result->message) ? $result->message : '');
-        }
-
         $sentInvitations = [];
 
-        foreach ($result->invitations as $invitationData) {
-            $sentInvitations[] = new SentInvitation($invitationData);
-        }
+        do {
+            $request = new Blank();
+            $request
+                ->setField('limit', 100)
+                ->setField('offset', count($sentInvitations));
+
+            $result = $this->sendRequest('GET', 'invitations.json', $request);
+
+            if (!isset($result->status) || $result->status != 'success') {
+                throw new Exception\OperationFailed(isset($result->message) ? $result->message : '');
+            }
+
+            foreach ($result->invitations as $invitationData) {
+                $sentInvitations[] = new Response\SentInvitation($invitationData);
+            }
+
+        } while (count($sentInvitations) < $result->total);
 
         return $sentInvitations;
     }
 
+    /**
+     * @return Response\Review[]
+     *
+     * @throws Exception\OperationFailed
+     */
+    public function getReviews()
+    {
+        $reviews = [];
+
+        do {
+            $request = new Blank();
+            $request
+                ->setField('limit', 100)
+                ->setField('offset', count($reviews));
+
+            $result = $this->sendRequest('GET', 'ratings.json', $request);
+
+            if (!isset($result->status) || $result->status !== 'success') {
+                throw new Exception\OperationFailed(isset($result->message) ? $result->message : '');
+            }
+
+            foreach ($result->ratings as $reviewData) {
+                $reviews[] = new Response\Review($reviewData);
+            }
+
+        } while (count($reviews) < $result->total);
+
+        return $reviews;
+    }
+
+    /**
+     * @param string                $method  Method of the request
+     * @param string                $URL     URL to send the request to
+     * @param RequestInterface|null $request Request
+     *
+     * @return mixed
+     *
+     * @throws Exception
+     * @throws Exception\ValidationFailed
+     */
     public function sendRequest($method, $URL, RequestInterface $request = null)
     {
         if (!$request) {
@@ -116,7 +196,7 @@ class Client
         $options['query'] = array_merge($options['query'], ['id' => $this->id, 'code' => $this->code]);
 
         try {
-            /** @var Response $response */
+            /** @var Psr7Response $response */
             $response = $this->getGuzzleClient()->request($method, $URL, $options);
 
         } catch (GuzzleException $e) {

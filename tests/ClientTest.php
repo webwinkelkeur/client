@@ -18,7 +18,9 @@ use WebwinkelKeur\Client\Response as ClientResponse;
  */
 final class ClientTest extends TestCase
 {
+    /** @var MockHandler */
     protected $mockHandler = null;
+    /** @var Client */
     protected $client = null;
 
     public function setUp()
@@ -32,6 +34,8 @@ final class ClientTest extends TestCase
     private function addMockJsonResponse($json)
     {
         $this->mockHandler->append(new Response(200, ['Content-Type' => 'application/json; encoding=UTF-8'], $json));
+
+        return $this;
     }
 
     public function testSendInvitationRequest()
@@ -41,7 +45,20 @@ final class ClientTest extends TestCase
             ->setEmailAddress('john.doe@example.org')
             ->setOrderNumber('101');
 
-        $this->assertTrue($this->client->sendInvitation($invitation));
+        $responses = [
+            ['status' => 'success', 'message' => 'Invite successfully added to queue!'],
+            ['status' => 'success', 'message' => 'Invitation already sent for this order.'],
+            ['status' => 'error', 'message' => 'Unexpected error while processing.'],
+        ];
+
+        foreach ($responses as $response) {
+            $this->addMockJsonResponse(json_encode($response));
+        }
+
+        $this->client->sendInvitation($invitation);
+        $this->client->sendInvitation($invitation);
+        $this->expectException(Client\Exception\OperationFailed::class);
+        $this->client->sendInvitation($invitation);
     }
 
     public function testFailedRequest()
@@ -65,6 +82,7 @@ final class ClientTest extends TestCase
         {
             "status": "success",
             "message": "Invitations successfully retrieved!",
+            "total": 2,
             "invitations": [
                 {
                     "email": "john.doe@example.com",
@@ -98,5 +116,63 @@ final class ClientTest extends TestCase
                 }
             }
         }
+    }
+
+    public function testGetReviews()
+    {
+        $this->addMockJsonResponse('
+        {
+            "status": "success",
+            "message": "Ratings successfully retrieved!",
+            "total": 2,
+            "ratings": [
+                {
+                    "name": "Frank",
+                    "email": "frank@example.org",
+                    "rating": 4,
+                    "ratings": {
+                        "shippingtime": 4,
+                        "customerservice": 3,
+                        "pricequality": 4,
+                        "aftersale": 5
+                    },
+                    "comment": "Awesome service!",
+                    "date": "2014-10-05",
+                    "read": true,
+                    "quarantine": false
+                },
+                {
+                    "name": "Pieter",
+                    "email": "pieter@example.net",
+                    "rating": 5,
+                    "ratings": {
+                        "shippingtime": 0,
+                        "customerservice": 0,
+                        "pricequality": 0,
+                        "aftersale": 0
+                    },
+                    "comment": "Bedankt voor de uiterst goede after-sales!",
+                    "date": "2010-07-20",
+                    "read": true,
+                    "quarantine": false
+                }
+            ]
+        }');
+
+        $reviews = $this->client->getReviews();
+        $this->assertEquals(2, count($reviews));
+        $this->assertEquals('Pieter', $reviews[1]->getName());
+
+        $this->addMockJsonResponse('
+        {
+            "status": "success",
+            "message": "No ratings found.",
+            "total": 0,
+            "ratings": []
+        }');
+
+        $noResults = $this->client->getReviews();
+
+        $this->assertEmpty($noResults);
     }
 }
