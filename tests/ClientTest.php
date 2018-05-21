@@ -175,4 +175,28 @@ final class ClientTest extends TestCase
 
         $this->assertEmpty($noResults);
     }
+
+    public function testGetReviewsSummary()
+    {
+        $this->addMockJsonResponse('
+        {
+            "status": "success",
+            "message": "Rating summary successfully retrieved!",
+            "data": {
+                "amount": 219,
+                "rating_average": 9.045647488584475,
+                "ratings_average": {
+                    "shippingtime": 4.6765,
+                    "customerservice": 4.6471,
+                    "pricequality": 4.25,
+                    "aftersale": 4.7576
+                }
+            }
+        }');
+
+        $reviewsSummary = $this->client->getReviewsSummary();
+
+        $this->assertEquals('219', $reviewsSummary->getAmount());
+        $this->assertGreaterThan(9, $reviewsSummary->getRatingAverage());
+    }
 }

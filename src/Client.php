@@ -97,22 +97,14 @@ class Client
 
     /**
      * @param Invitation $request
-     *
-     * @throws Exception\OperationFailed
      */
     public function sendInvitation(Invitation $request)
     {
-        $result = $this->sendRequest('POST', 'invitations.json', $request);
-
-        if (!isset($result->status) || $result->status != 'success') {
-            throw new Exception\OperationFailed(isset($result->message) ? $result->message : '');
-        }
+        $this->sendRequest('POST', 'invitations.json', $request);
     }
 
     /**
      * @return Response\SentInvitation[]
-     *
-     * @throws Exception\OperationFailed
      */
     public function getSentInvitations()
     {
@@ -126,10 +118,6 @@ class Client
 
             $result = $this->sendRequest('GET', 'invitations.json', $request);
 
-            if (!isset($result->status) || $result->status != 'success') {
-                throw new Exception\OperationFailed(isset($result->message) ? $result->message : '');
-            }
-
             foreach ($result->invitations as $invitationData) {
                 $sentInvitations[] = new Response\SentInvitation($invitationData);
             }
@@ -141,8 +129,6 @@ class Client
 
     /**
      * @return Response\Review[]
-     *
-     * @throws Exception\OperationFailed
      */
     public function getReviews()
     {
@@ -156,10 +142,6 @@ class Client
 
             $result = $this->sendRequest('GET', 'ratings.json', $request);
 
-            if (!isset($result->status) || $result->status !== 'success') {
-                throw new Exception\OperationFailed(isset($result->message) ? $result->message : '');
-            }
-
             foreach ($result->ratings as $reviewData) {
                 $reviews[] = new Response\Review($reviewData);
             }
@@ -170,6 +152,16 @@ class Client
     }
 
     /**
+     * @return Response\ReviewsSummary
+     */
+    public function getReviewsSummary()
+    {
+        $result = $this->sendRequest('GET', 'ratings_summary.json');
+
+        return new Response\ReviewsSummary($result->data);
+    }
+
+    /**
      * @param string                $method  Method of the request
      * @param string                $URL     URL to send the request to
      * @param RequestInterface|null $request Request
@@ -177,6 +169,7 @@ class Client
      * @return mixed
      *
      * @throws Exception
+     * @throws Exception\OperationFailed
      * @throws Exception\ValidationFailed
      */
     public function sendRequest($method, $URL, RequestInterface $request = null)
@@ -208,9 +201,17 @@ class Client
         }
 
         foreach ($response->getHeader('Content-Type') as $contentType) {
-            if (strpos(strtolower($contentType), 'application/json') === 0) {
-                return json_decode($response->getBody()->getContents());
+            if (strpos(strtolower($contentType), 'application/json') !== 0) {
+                continue;
             }
+
+            $result = json_decode($response->getBody()->getContents());
+
+            if (!isset($result->status) || $result->status != 'success') {
+                throw new Exception\OperationFailed(isset($result->message) ? $result->message : '');
+            }
+
+            return $result;
         }
 
         return $response->getBody()->getContents();
