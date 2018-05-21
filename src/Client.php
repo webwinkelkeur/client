@@ -20,6 +20,7 @@ class Client
         'User-Agent' => self::USER_AGENT,
     ];
     protected $endpoint = 'https://dashboard.webwinkelkeur.nl/api/1.0/';
+    protected $richSnippetURL = 'https://www.webwinkelkeur.nl/shop_rich_snippet.php';
     protected $id = '';
     protected $code = '';
     /** @var GuzzleClient */
@@ -169,6 +170,43 @@ class Client
         $result = $this->sendRequest('GET', 'webshop.json');
 
         return new Response\Webshop($result->data);
+    }
+
+    /**
+     * @return string Rich snippet
+     *
+     * @throws Exception
+     * @throws Exception\OperationFailed
+     */
+    public function getRichSnippet()
+    {
+        try {
+            /** @var Psr7Response $response */
+            $response = $this->getGuzzleClient()->get($this->richSnippetURL, ['query' => ['id' => $this->id]]);
+
+        } catch (GuzzleException $e) {
+            throw new Exception($e->getMessage(), $e->getCode(), $e);
+        }
+
+        if ($response->getStatusCode() < 200 || 299 < $response->getStatusCode()) {
+            throw new Exception($response->getReasonPhrase());
+        }
+
+        foreach ($response->getHeader('Content-Type') as $contentType) {
+            if (strpos(strtolower($contentType), 'application/json') !== 0) {
+                continue;
+            }
+
+            $result = json_decode($response->getBody()->getContents());
+
+            if (!isset($result->result) || $result->result != 'ok') {
+                throw new Exception\OperationFailed(isset($result->message) ? $result->message : '');
+            }
+
+            return $result->content;
+        }
+
+        throw new Exception\OperationFailed('Unexpected response received');
     }
 
     /**

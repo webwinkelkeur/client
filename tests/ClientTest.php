@@ -241,4 +241,17 @@ final class ClientTest extends TestCase
             $this->assertInstanceOf(ClientResponse\Webshop\Language::class, $language);
         }
     }
+
+    public function testGetRichSnippet()
+    {
+        $this->addMockJsonResponse('
+        {
+            "result": "ok",
+            "content": "<div class=\"webwinkelkeur-rich-snippet\" itemscope=\"\"\n     itemtype=\"http://www.data-vocabulary.org/Review-aggregate\"\n     style=\"padding:10px;text-align:center;\">\n    <p>\n        De waardering van <span itemprop=\"itemreviewed\">www.webwinkelkeur.nl</span> bij <a href=\"https://www.webwinkelkeur.nl/leden/WebwinkelKeurnl-Test_1.html\" target=\"_blank\">Webwinkel Keurmerk Klantbeoordelingen</a> is <span itemprop=\"rating\" itemscope=\"\" itemtype=\"http://data-vocabulary.org/Rating\"><span itemprop=\"average\">9.0</span>/<span itemprop=\"best\">10</span></span> gebaseerd op <span itemprop=\"votes\">219</span> reviews.\n    </p>\n</div>"
+        }');
+
+        $richSnippet = $this->client->getRichSnippet();
+
+        $this->assertStringStartsWith('<div class="webwinkelkeur-rich-snippet"', $richSnippet);
+    }
 }
