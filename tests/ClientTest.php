@@ -113,7 +113,7 @@ final class ClientTest extends TestCase
         }
     }
 
-    public function testGetReviews()
+    public function testGetRatings()
     {
         $this->addMockJsonResponse('
         {
@@ -154,12 +154,12 @@ final class ClientTest extends TestCase
             ]
         }');
 
-        foreach ($this->client->getReviews() as $review) {
-            $this->assertInstanceOf(ClientResponse\Review::class, $review);
+        foreach ($this->client->getRatings() as $rating) {
+            $this->assertInstanceOf(ClientResponse\Rating::class, $rating);
         }
     }
 
-    public function testGetReviewsSummary()
+    public function testGetRatingsSummary()
     {
         $this->addMockJsonResponse('
         {
@@ -177,7 +177,7 @@ final class ClientTest extends TestCase
             }
         }');
 
-        $this->assertInstanceOf(ClientResponse\ReviewsSummary::class, $this->client->getReviewsSummary());
+        $this->assertInstanceOf(ClientResponse\RatingsSummary::class, $this->client->getRatingsSummary());
     }
 
     public function testGetWebshop()

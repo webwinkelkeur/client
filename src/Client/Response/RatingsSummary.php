@@ -3,7 +3,7 @@ namespace WebwinkelKeur\Client\Response;
 
 use WebwinkelKeur\Client\ResponseAbstract;
 
-class ReviewsSummary extends ResponseAbstract
+class RatingsSummary extends ResponseAbstract
 {
     public function __construct($summaryData)
     {

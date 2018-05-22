@@ -3,21 +3,21 @@ namespace WebwinkelKeur\Client\Response;
 
 use WebwinkelKeur\Client\ResponseAbstract;
 
-class Review extends ResponseAbstract
+class Rating extends ResponseAbstract
 {
-    public function __construct($reviewData)
+    public function __construct($ratingData)
     {
-        $this->data['name'] = $reviewData->name;
-        $this->data['email'] = $reviewData->email;
-        $this->data['rating'] = $reviewData->rating;
-        $this->data['rating_shippingtime'] = $reviewData->ratings->shippingtime;
-        $this->data['rating_customerservice'] = $reviewData->ratings->customerservice;
-        $this->data['rating_pricequality'] = $reviewData->ratings->pricequality;
-        $this->data['rating_aftersale'] = $reviewData->ratings->aftersale;
-        $this->data['comment'] = $reviewData->comment;
-        $this->data['date'] = new \DateTimeImmutable($reviewData->date);
-        $this->data['read'] = $reviewData->read;
-        $this->data['quarantine'] = $reviewData->quarantine;
+        $this->data['name'] = $ratingData->name;
+        $this->data['email'] = $ratingData->email;
+        $this->data['rating'] = $ratingData->rating;
+        $this->data['rating_shippingtime'] = $ratingData->ratings->shippingtime;
+        $this->data['rating_customerservice'] = $ratingData->ratings->customerservice;
+        $this->data['rating_pricequality'] = $ratingData->ratings->pricequality;
+        $this->data['rating_aftersale'] = $ratingData->ratings->aftersale;
+        $this->data['comment'] = $ratingData->comment;
+        $this->data['date'] = new \DateTimeImmutable($ratingData->date);
+        $this->data['read'] = $ratingData->read;
+        $this->data['quarantine'] = $ratingData->quarantine;
     }
 
     public function getName()

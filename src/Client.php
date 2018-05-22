@@ -129,36 +129,36 @@ class Client
     }
 
     /**
-     * @return \Generator|Response\Review[]
+     * @return \Generator|Response\Rating[]
      */
-    public function getReviews()
+    public function getRatings()
     {
-        $reviewsCount = 0;
+        $ratingsCount = 0;
 
         do {
             $request = new Blank();
             $request
                 ->setField('limit', 100)
-                ->setField('offset', $reviewsCount);
+                ->setField('offset', $ratingsCount);
 
             $result = $this->sendRequest('GET', 'ratings.json', $request);
 
-            foreach ($result->ratings as $reviewData) {
-                $reviewsCount++;
-                 yield new Response\Review($reviewData);
+            foreach ($result->ratings as $ratingData) {
+                $ratingsCount++;
+                 yield new Response\Rating($ratingData);
             }
 
-        } while ($reviewsCount < $result->total);
+        } while ($ratingsCount < $result->total);
     }
 
     /**
-     * @return Response\ReviewsSummary
+     * @return Response\RatingsSummary
      */
-    public function getReviewsSummary()
+    public function getRatingsSummary()
     {
         $result = $this->sendRequest('GET', 'ratings_summary.json');
 
-        return new Response\ReviewsSummary($result->data);
+        return new Response\RatingsSummary($result->data);
     }
 
     /**
