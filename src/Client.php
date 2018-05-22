@@ -105,51 +105,50 @@ class Client
     }
 
     /**
-     * @return Response\SentInvitation[]
+     * @return \Generator|Response\SentInvitation[]
      */
     public function getSentInvitations()
     {
-        $sentInvitations = [];
+        $sentInvitationsCount = 0;
 
         do {
             $request = new Blank();
             $request
                 ->setField('limit', 100)
-                ->setField('offset', count($sentInvitations));
+                ->setField('offset', $sentInvitationsCount);
 
             $result = $this->sendRequest('GET', 'invitations.json', $request);
 
             foreach ($result->invitations as $invitationData) {
-                $sentInvitations[] = new Response\SentInvitation($invitationData);
+                $sentInvitationsCount++;
+
+                yield new Response\SentInvitation($invitationData);
             }
 
-        } while (count($sentInvitations) < $result->total);
-
-        return $sentInvitations;
+        } while ($sentInvitationsCount < $result->total);
     }
 
     /**
-     * @return Response\Review[]
+     * @return \Generator|Response\Review[]
      */
     public function getReviews()
     {
-        $reviews = [];
+        $reviewsCount = 0;
 
         do {
             $request = new Blank();
             $request
                 ->setField('limit', 100)
-                ->setField('offset', count($reviews));
+                ->setField('offset', $reviewsCount);
 
             $result = $this->sendRequest('GET', 'ratings.json', $request);
 
             foreach ($result->ratings as $reviewData) {
-                $reviews[] = new Response\Review($reviewData);
+                $reviewsCount++;
+                 yield new Response\Review($reviewData);
             }
 
-        } while (count($reviews) < $result->total);
-
-        return $reviews;
+        } while ($reviewsCount < $result->total);
     }
 
     /**

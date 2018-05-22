@@ -110,11 +110,6 @@ final class ClientTest extends TestCase
         foreach ($this->client->getSentInvitations() as $invitation) {
             $this->assertInstanceOf(ClientResponse\SentInvitation::class, $invitation);
             $this->assertInstanceOf(\DateTimeImmutable::class, $invitation->getCreatedAt());
-            foreach ([3003 => 'john.doe@example.com', 5005 => 'jane.doe@example.net'] as $orderNumber => $email) {
-                if ($invitation->getOrderNumber() == $orderNumber) {
-                    $this->assertEquals($email, $invitation->getEmail());
-                }
-            }
         }
     }
 
@@ -159,21 +154,9 @@ final class ClientTest extends TestCase
             ]
         }');
 
-        $reviews = $this->client->getReviews();
-        $this->assertEquals(2, count($reviews));
-        $this->assertEquals('Pieter', $reviews[1]->getName());
-
-        $this->addMockJsonResponse('
-        {
-            "status": "success",
-            "message": "No ratings found.",
-            "total": 0,
-            "ratings": []
-        }');
-
-        $noResults = $this->client->getReviews();
-
-        $this->assertEmpty($noResults);
+        foreach ($this->client->getReviews() as $review) {
+            $this->assertInstanceOf(ClientResponse\Review::class, $review);
+        }
     }
 
     public function testGetReviewsSummary()
@@ -194,10 +177,7 @@ final class ClientTest extends TestCase
             }
         }');
 
-        $reviewsSummary = $this->client->getReviewsSummary();
-
-        $this->assertEquals('219', $reviewsSummary->getAmount());
-        $this->assertGreaterThan(9, $reviewsSummary->getRatingAverage());
+        $this->assertInstanceOf(ClientResponse\ReviewsSummary::class, $this->client->getReviewsSummary());
     }
 
     public function testGetWebshop()
