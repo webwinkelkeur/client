@@ -114,7 +114,7 @@ final class ClientTest extends TestCase
             $this->assertInstanceOf(\DateTimeImmutable::class, $invitation->getCreatedAt());
         }
 
-        $this->assertGreaterThan(0, $counter);
+        $this->assertEquals(2, $counter);
     }
 
     public function testGetRatings()
@@ -164,7 +164,7 @@ final class ClientTest extends TestCase
             $this->assertInstanceOf(ClientResponse\Rating::class, $rating);
         }
 
-        $this->assertGreaterThan(0, $counter);
+        $this->assertEquals(2, $counter);
     }
 
     public function testGetRatingsSummary()

@@ -17,11 +17,15 @@ To send requests to the API, you need your WebwinkelKeur ID and authentication t
 
 ```php
 use WebwinkelKeur\Client;
-use WebwinkelKeur\Client\Request\Invitation;
+use WebwinkelKeur\Client\Request;
 
 $webwinkelKeurClient = new Client($id, $authToken);
+```
 
-$invitation = new Invitation();
+### Sending invitations
+
+```php
+$invitation = new Request\Invitation();
 $invitation
     ->setCustomerName('John Doe')
     ->setEmailAddress('john.doe@example.com')
@@ -32,6 +36,68 @@ $invitation
 try {
     $webwinkelKeurClient->sendInvitation($invitation);
     echo 'Success!';
+} catch (Client\Exception $e) {
+    echo $e->getMessage();
+}
+```
+
+### Retrieving sent invitations
+
+```php
+try {
+    foreach ($webwinkelKeurClient->getSentInvitations() as $sentInvitation) {
+        echo 'Invitation for order ' . $sentInvitation->getOrderNumber() 
+            . ' was sent on ' . $sentInvitation->getCreatedAt()->format('r') 
+            . ' to ' . $sentInvitation->getEmail() . "\n";
+    }
+} catch (Client\Exception $e) {
+    echo $e->getMessage();
+}
+```
+
+### Retrieving ratings
+
+```php
+try {
+    foreach ($webwinkelKeurClient->getRatings() as $rating) {
+        echo $rating->getName() . ' says "' . $rating->getComment() . "\"\n";  
+    }
+} catch (Client\Exception $e) {
+    echo $e->getMessage();
+}
+```
+
+### Retrieving ratings summary
+
+```php
+try {
+    $ratingsSummary = $webwinkelKeurClient->getRatingsSummary();
+    echo 'The average rating is ' . $ratingsSummary->getRatingAverage() 
+        . ' out of ' . $ratingsSummary->getAmount() . " ratings.";
+} catch (Client\Exception $e) {
+    echo $e->getMessage();
+}
+```
+
+### Retrieving web shop details
+
+```php
+try {
+    $webshop = $webwinkelKeurClient->getWebshop();
+    $address = $webshop->getAddress();
+    echo $webshop->getName() . ' is located at ' 
+        . $address->getNumber() . ' ' . $address->getStreet() . ', ' . $address->getCity();
+} catch (Client\Exception $e) {
+    echo $e->getMessage();
+}
+```
+
+### Retrieving rich snippet
+
+```php
+try {
+    $richSnippet = $webwinkelKeurClient->getRichSnippet();
+    echo $richSnippet;
 } catch (Client\Exception $e) {
     echo $e->getMessage();
 }
