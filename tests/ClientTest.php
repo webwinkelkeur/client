@@ -107,10 +107,14 @@ final class ClientTest extends TestCase
             ]
         }');
 
+        $counter = 0;
         foreach ($this->client->getSentInvitations() as $invitation) {
+            $counter++;
             $this->assertInstanceOf(ClientResponse\SentInvitation::class, $invitation);
             $this->assertInstanceOf(\DateTimeImmutable::class, $invitation->getCreatedAt());
         }
+
+        $this->assertGreaterThan(0, $counter);
     }
 
     public function testGetRatings()
@@ -154,9 +158,13 @@ final class ClientTest extends TestCase
             ]
         }');
 
+        $counter = 0;
         foreach ($this->client->getRatings() as $rating) {
+            $counter++;
             $this->assertInstanceOf(ClientResponse\Rating::class, $rating);
         }
+
+        $this->assertGreaterThan(0, $counter);
     }
 
     public function testGetRatingsSummary()
