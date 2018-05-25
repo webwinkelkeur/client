@@ -1,9 +1,12 @@
 WebwinkelKeur API Client
 ========================
 
-This is a web client for the WebwinkelKeur API. 
+This is a web client for the WebwinkelKeur API.
 
-The documentation of the API is available at [https://dashboard.webwinkelkeur.nl/pages/api](https://dashboard.webwinkelkeur.nl/pages/api).
+The documentation of the API is available at https://dashboard.webwinkelkeur.nl/pages/api.
+
+Should you experience any issues with the API client, feel free to open a
+[GitHub issue](https://github.com/webwinkelkeur/client/issues).
 
 ## Installation
 
@@ -13,7 +16,7 @@ You can use `composer` to install the API client into your project:
 
 ## Usage
 
-To send requests to the API, you need your WebwinkelKeur ID and authentication token. 
+To send requests to the API, you need your WebwinkelKeur ID and authentication token.
 
 ```php
 use WebwinkelKeur\Client;
@@ -46,8 +49,8 @@ try {
 ```php
 try {
     foreach ($webwinkelKeurClient->getSentInvitations() as $sentInvitation) {
-        echo 'Invitation for order ' . $sentInvitation->getOrderNumber() 
-            . ' was sent on ' . $sentInvitation->getCreatedAt()->format('r') 
+        echo 'Invitation for order ' . $sentInvitation->getOrderNumber()
+            . ' was sent on ' . $sentInvitation->getCreatedAt()->format('r')
             . ' to ' . $sentInvitation->getEmail() . "\n";
     }
 } catch (Client\Exception $e) {
@@ -60,7 +63,7 @@ try {
 ```php
 try {
     foreach ($webwinkelKeurClient->getRatings() as $rating) {
-        echo $rating->getName() . ' says "' . $rating->getComment() . "\"\n";  
+        echo $rating->getName() . ' says "' . $rating->getComment() . "\"\n";
     }
 } catch (Client\Exception $e) {
     echo $e->getMessage();
@@ -72,7 +75,7 @@ try {
 ```php
 try {
     $ratingsSummary = $webwinkelKeurClient->getRatingsSummary();
-    echo 'The average rating is ' . $ratingsSummary->getRatingAverage() 
+    echo 'The average rating is ' . $ratingsSummary->getRatingAverage()
         . ' out of ' . $ratingsSummary->getAmount() . " ratings.";
 } catch (Client\Exception $e) {
     echo $e->getMessage();
@@ -85,7 +88,7 @@ try {
 try {
     $webshop = $webwinkelKeurClient->getWebshop();
     $address = $webshop->getAddress();
-    echo $webshop->getName() . ' is located at ' 
+    echo $webshop->getName() . ' is located at '
         . $address->getNumber() . ' ' . $address->getStreet() . ', ' . $address->getCity();
 } catch (Client\Exception $e) {
     echo $e->getMessage();
