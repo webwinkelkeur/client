@@ -9,7 +9,6 @@
         "client",
         "HTTP client"
     ],
-    "version": "1.0",
     "type": "library",
     "license": "MIT",
     "require": {
