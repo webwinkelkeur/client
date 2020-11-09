@@ -1,8 +1,0 @@
-#!/usr/bin/env bash
-
-set -euo pipefail
-cd "$(dirname "$0")/.."
-
-repo=git@github.com:webwinkelkeur/client
-
-git push "$repo" master --tags
